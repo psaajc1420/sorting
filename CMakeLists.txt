@@ -3,4 +3,4 @@ project(sorting)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(sorting main.cc sorter.h bubble_sort.h timer.cc timer.h compare_sorts.cc compare_sorts.h profile_sort.cc profile_sort.h)
+add_executable(sorting main.cc sorter.h bubble_sort.h timer.cc timer.h compare_sorts.cc compare_sorts.h)

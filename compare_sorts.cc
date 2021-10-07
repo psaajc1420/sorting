@@ -4,47 +4,60 @@
 
 #include "compare_sorts.h"
 
-void CompareSorts::Run() {
-  const size_t kNumSortingAlgorithms = 1;
-  const size_t kNumValues = 5;
+void CompareSorts::Compare(Sorter<int> *sorter) {
 
-  BubbleSort<int> bubble_sort;
-  vector<size_t> values = {100, 1000, 10000, 100000, 100000};
+  Timer timer;
+  for (auto size: n_values_) {
+    vector<int> data(size);
 
-  Sorter<int> *sorters[kNumSortingAlgorithms] = {&bubble_sort};
+    for (auto &it: vector_type_map_) {
 
-  for (auto sorter: sorters) {
-    ProfileSort<int> profile_sort(sorter);
+      PopulateArrayFuncPtr populate = it.second;
+      populate(data, size);
+      int dataArray[size];
 
-    profile_sort.CalculateTimes(, values);
+      std::copy(data.begin(), data.begin(), dataArray);
+      timer.Start();
+      sorter->Sort(dataArray, size);
+      timer.Stop();
+
+      PopulateVectorTypeMap(data, timer.ElapsedSeconds(), it.first);
+    }
   }
+  PrintVectorTypeMap();
 
 }
 
-void CompareSorts::PopulateArrayAscending(int *data, size_t size) {
-  for (int i = 0; i < size; i++) {
-    data[i] = i;
+void CompareSorts::PopulateVectorTypeMap(
+    const vector<int> &data,
+    double time,
+    const string &type) {
+
+  DataInfo info;
+  info.data = data;
+  auto it = vector_data_info_map_.find(type);
+  if (it == vector_data_info_map_.end()) {
+    vector_data_info_map_[type] = vector<DataInfo>();
+    info.times = vector<double>();
+  }
+  info.times.push_back(time);
+  vector_data_info_map_[type].push_back(info);
+
+}
+
+void CompareSorts::PrintVectorTypeMap() {
+  for (auto &it: vector_data_info_map_) {
+    cout << it.first;
+    for (const auto &data_info: it.second) {
+      for (auto n_values: data_info.times) {
+        cout << "," << n_values;
+      }
+    }
+    cout << endl;
+
   }
 }
 
-void CompareSorts::PopulateArrayDescending(int *data, size_t size) {
-  for (int i = size; i > 0; i--) {
-    data[size - i] = i;
-  }
-}
 
-void CompareSorts::PopulateArrayRandom(int *data, size_t size) {
-  srand(time(nullptr));
-  for (int i = 0; i < size; i++) {
-    data[i] = rand() % size;
-  }
-}
-
-void CompareSorts::Print(int *data, size_t size) {
-  for (int i = 0; i < size; i++) {
-    cout << data[i] << " ";
-  }
-  cout << endl;
-}
 
 
